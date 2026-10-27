@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
+from datetime import timedelta
 from pathlib import Path
 from decouple import config
 
@@ -40,8 +41,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # Module
     "rest_framework",
+    "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
     "django_filters",
     "drf_spectacular",
+    "drf_yasg",
     # Apps
     "apps.accounts",
     "apps.todos",
@@ -192,3 +196,94 @@ if SHOW_DEBUGGER_TOOLBAR:
         "10.0.2.2",
     ]
 
+# swagger configs
+SHOW_SWAGGER = config("SHOW_SWAGGER", cast=bool, default=True)
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Your Project API',
+    'DESCRIPTION': 'Comprehensive documentation for Your Project API, including all endpoints, data models, and authentication mechanisms.',
+    'VERSION': '1.0.0',
+    'TOS': 'https://yourproject.com/terms/',
+    'CONTACT': {
+        "name": "API Support",
+        "url": "https://yourproject.com/support",
+        "email": "support@yourproject.com"
+    },
+    'LICENSE': {
+        'name': 'MIT License',
+        'url': 'https://opensource.org/licenses/MIT'
+    },
+    'SERVERS': [
+        {"url": "http://127.0.0.1:8000", "description": "local server"},
+        # {"url": "https://staging.yourproject.com", "description": "Staging server"},
+    ],
+    
+    'SERVE_INCLUDE_SCHEMA': True,
+    'SCHEMA_PATH_PREFIX': '/api/v1',
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SORT_OPERATIONS': True,
+    'SORT_OPERATION_PARAMETERS': True,
+    'APPEND_COMPONENTS': {},
+    
+    'ENUM_NAME_OVERRIDES': {},
+    'PREPROCESSING_HOOKS': [],
+    'POSTPROCESSING_HOOKS': [],
+    'SCHEMA_GENERATOR_CLASS': 'drf_spectacular.generators.SchemaGenerator',
+
+    'SWAGGER_UI_SETTINGS': {
+        'deepLinking': True,
+        'persistAuthorization': True,
+        'displayOperationId': True,
+        'defaultModelsExpandDepth': 2,
+        'defaultModelExpandDepth': 2,
+        'defaultModelRendering': 'example',
+        'docExpansion': 'list',
+        'filter': True,
+        'showExtensions': True,
+        'showCommonExtensions': True,
+    },
+
+    'REDOC_SETTINGS': {
+        'expandResponses': '200,201',
+        'hideDownloadButton': False,
+        'pathInMiddlePanel': True,
+        'theme': {
+            'spacing.unit': 8,
+            'colors.primary.main': '#2E86C1',
+        },
+    }
+    
+}
+
+
+# Simple JWT configuration
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(
+        minutes=config("ACCESS_TOKEN_LIFETIME_MINUTES", cast=int, default=15)
+    ),
+    "REFRESH_TOKEN_LIFETIME": timedelta(
+        days=config("REFRESH_TOKEN_LIFETIME_DAYS", cast=int, default=7)
+    ),
+    "ROTATE_REFRESH_TOKENS": not DEBUG,  # Enable rotation in production
+    "BLACKLIST_AFTER_ROTATION": not DEBUG,
+    "UPDATE_LAST_LOGIN": False,
+
+    # Cookie settings
+    "AUTH_COOKIE": "access_token",
+    "AUTH_COOKIE_REFRESH": "refresh_token",
+    "AUTH_COOKIE_DOMAIN": config("AUTH_COOKIE_DOMAIN", default=None),
+    "AUTH_COOKIE_SECURE": config("AUTH_COOKIE_SECURE", cast=bool, default=not DEBUG),
+    "AUTH_COOKIE_HTTP_ONLY": True,
+    "AUTH_COOKIE_PATH": "/",
+    "AUTH_COOKIE_SAMESITE": config("AUTH_COOKIE_SAMESITE", default="Lax"),
+    "AUTH_CSRF_AUTHENTICATION": config("AUTH_CSRF_AUTHENTICATION", cast=bool, default=False)
+}
+
+# accounts settings
+AUTH_USER_MODEL = "accounts.User"
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
