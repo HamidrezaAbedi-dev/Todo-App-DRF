@@ -2,14 +2,17 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core import exceptions
-from apps.accounts.api.v1.exceptions import CustomValidationException
+from apps.accounts.api.utils.exceptions import CustomValidationException
 from apps.accounts.messages import Messages
 from apps.accounts.models import Profile
+from apps.accounts.api.utils.image_validator import sanitize_profile_image
 
 User = get_user_model()
 
 class RegisterSerializer(serializers.ModelSerializer):
-    """Registration serializer with password checkup"""
+    """
+    Registration serializer with password checkup
+    """
     email = serializers.EmailField(required=True)
     password = serializers.CharField(
         max_length=68, min_length=6, write_only=True, required=True,
@@ -103,8 +106,19 @@ class ChangePasswordSerializer(serializers.Serializer):
 
 
 class ProfileSerializer(serializers.ModelSerializer):
+    """
+    Serializer for retrieving and updating user profile information.
+    """
     email = serializers.CharField(source='user.email', read_only=True)
+    updated_date = serializers.ReadOnlyField()
+
     class Meta:
         model = Profile
         fields = ['id', 'email', 'first_name', 'last_name', 'image', 'updated_date']
+
+    def validate_image(self, value):
+        if value is None:
+            return value
+
+        return sanitize_profile_image(value)
 

@@ -1,5 +1,5 @@
 from rest_framework.generics import (
-    CreateAPIView, GenericAPIView, RetrieveUpdateAPIView, DestroyAPIView,
+    CreateAPIView, GenericAPIView, RetrieveUpdateAPIView,
 )
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import (

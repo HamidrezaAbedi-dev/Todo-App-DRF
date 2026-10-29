@@ -26,6 +26,9 @@ urlpatterns = [
     
     # accounts urls
     path("accounts/",include("apps.accounts.urls")),
+
+    # todos urls
+    path("todos/",include("apps.todos.urls")),
 ]
 
 if settings.DEBUG:
