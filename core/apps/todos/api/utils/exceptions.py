@@ -1,5 +1,6 @@
 from rest_framework.exceptions import APIException
 
+
 class CustomValidationException(APIException):
     """
     Return API errors in a consistent response format.
@@ -17,7 +18,9 @@ class CustomValidationException(APIException):
         if details is not None:
             error["details"] = details
 
-        super().__init__({
-            "success": False,
-            "error": error,
-        })
+        super().__init__(
+            {
+                "success": False,
+                "error": error,
+            }
+        )

@@ -19,6 +19,7 @@ def set_jwt_cookie(response, key, value, lifetime):
         samesite=jwt_settings.get("AUTH_COOKIE_SAMESITE", "Lax"),
     )
 
+
 def delete_jwt_cookie(response, key, *, path=None):
     """
     Delete a cookie using the project's cookie settings.

@@ -182,3 +182,7 @@ cython_debug/
 
 # database
 postgres/data/*
+
+# core
+core/media/*
+core/static/

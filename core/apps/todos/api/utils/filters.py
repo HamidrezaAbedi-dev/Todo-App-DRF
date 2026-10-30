@@ -1,4 +1,3 @@
-
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter
 
@@ -45,17 +44,12 @@ class StrictOrderingFilter(OrderingFilter):
         ordering = request.query_params.get(self.ordering_param)
 
         if ordering:
-            allowed_fields = set(self.get_valid_fields(
-                queryset, view, {"request": request}
-            ))
-            allowed_field_names = {
-                field[0] for field in allowed_fields
-            }
+            allowed_fields = set(
+                self.get_valid_fields(queryset, view, {"request": request})
+            )
+            allowed_field_names = {field[0] for field in allowed_fields}
 
-            requested_fields = [
-                field.strip()
-                for field in ordering.split(",")
-            ]
+            requested_fields = [field.strip() for field in ordering.split(",")]
 
             for field in requested_fields:
                 field_name = field.lstrip("-")

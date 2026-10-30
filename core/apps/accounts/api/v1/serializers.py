@@ -9,22 +9,30 @@ from apps.accounts.api.utils.image_validator import sanitize_profile_image
 
 User = get_user_model()
 
+
 class RegisterSerializer(serializers.ModelSerializer):
     """
     Registration serializer with password checkup
     """
+
     email = serializers.EmailField(required=True)
     password = serializers.CharField(
-        max_length=68, min_length=6, write_only=True, required=True,
+        max_length=68,
+        min_length=6,
+        write_only=True,
+        required=True,
         style={
-            'input_type': 'password',
-        }
+            "input_type": "password",
+        },
     )
     password1 = serializers.CharField(
-        max_length=68, min_length=6, write_only=True, required=True,
+        max_length=68,
+        min_length=6,
+        write_only=True,
+        required=True,
         style={
-            'input_type': 'password',
-        }
+            "input_type": "password",
+        },
     )
 
     class Meta:
@@ -33,21 +41,19 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         if attrs["password"] != attrs["password1"]:
-            raise serializers.ValidationError(
-                {"details": "Passwords does not match"}
-            )
-            
+            raise serializers.ValidationError({"details": "Passwords does not match"})
+
         try:
-            validate_password(attrs.get('password'))
+            validate_password(attrs.get("password"))
         except exceptions.ValidationError as e:
-            raise serializers.ValidationError({'password':list(e.messages)})
-        
+            raise serializers.ValidationError({"password": list(e.messages)})
+
         if User.objects.filter(email=attrs.get("email")).exists():
             raise CustomValidationException(
                 code="USER_ALREADY_EXISTS",
                 message=Messages.user_already_exists,
             )
-        
+
         return super().validate(attrs)
 
     def create(self, validated_data):
@@ -93,9 +99,9 @@ class ChangePasswordSerializer(serializers.Serializer):
             )
 
         if attrs["old_password"] == attrs["new_password"]:
-            raise serializers.ValidationError({
-                "new_password": Messages.new_password_must_be_different
-            })
+            raise serializers.ValidationError(
+                {"new_password": Messages.new_password_must_be_different}
+            )
 
         # Apply Django's configured password validators.
         validate_password(attrs["new_password"], user=user)
@@ -113,12 +119,13 @@ class ProfileSerializer(serializers.ModelSerializer):
     """
     Serializer for retrieving and updating user profile information.
     """
-    email = serializers.CharField(source='user.email', read_only=True)
+
+    email = serializers.CharField(source="user.email", read_only=True)
     updated_date = serializers.ReadOnlyField()
 
     class Meta:
         model = Profile
-        fields = ['id', 'email', 'first_name', 'last_name', 'image', 'updated_date']
+        fields = ["id", "email", "first_name", "last_name", "image", "updated_date"]
 
     def validate_image(self, value):
         if value is None:

@@ -43,27 +43,36 @@ class TaskAdmin(admin.ModelAdmin):
     autocomplete_fields = ("user",)
 
     fieldsets = (
-        ("Task Information", {
-            "fields": (
-                "user",
-                "title",
-                "description",
-                "priority",
-            )
-        }),
-        ("Task Status", {
-            "fields": (
-                "is_completed",
-                "due_date",
-            )
-        }),
-        ("Timestamps", {
-            "fields": (
-                "created_date",
-                "updated_date",
-                "deleted_at",
-            )
-        }),
+        (
+            "Task Information",
+            {
+                "fields": (
+                    "user",
+                    "title",
+                    "description",
+                    "priority",
+                )
+            },
+        ),
+        (
+            "Task Status",
+            {
+                "fields": (
+                    "is_completed",
+                    "due_date",
+                )
+            },
+        ),
+        (
+            "Timestamps",
+            {
+                "fields": (
+                    "created_date",
+                    "updated_date",
+                    "deleted_at",
+                )
+            },
+        ),
     )
 
     readonly_fields = (

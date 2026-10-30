@@ -37,12 +37,12 @@ ALLOWED_HOSTS = config(
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
     # Module
     "django_extensions",
     "rest_framework",
@@ -57,33 +57,34 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = 'core.urls'
+ROOT_URLCONF = "core.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [BASE_DIR / "templates"],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'core.wsgi.application'
+WSGI_APPLICATION = "core.wsgi.application"
 
 
 # Database
@@ -125,16 +126,16 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
@@ -142,9 +143,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "UTC"
 
 USE_I18N = True
 
@@ -163,6 +164,15 @@ MEDIA_ROOT = BASE_DIR / "media"
 STATICFILES_DIRS = [
     BASE_DIR / "staticfiles",
 ]
+
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 
 # Email
@@ -204,59 +214,51 @@ if SHOW_DEBUGGER_TOOLBAR:
 # swagger configs
 SHOW_SWAGGER = config("SHOW_SWAGGER", cast=bool, default=True)
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'Your Project API',
-    'DESCRIPTION': 'Comprehensive documentation for Your Project API, including all endpoints, data models, and authentication mechanisms.',
-    'VERSION': '1.0.0',
-    'TOS': 'https://yourproject.com/terms/',
-    'CONTACT': {
+    "TITLE": "Your Project API",
+    "DESCRIPTION": "Comprehensive documentation for Your Project API, including all endpoints, data models, and authentication mechanisms.",
+    "VERSION": "1.0.0",
+    "TOS": "https://yourproject.com/terms/",
+    "CONTACT": {
         "name": "API Support",
         "url": "https://yourproject.com/support",
-        "email": "support@yourproject.com"
+        "email": "support@yourproject.com",
     },
-    'LICENSE': {
-        'name': 'MIT License',
-        'url': 'https://opensource.org/licenses/MIT'
-    },
-    'SERVERS': [
+    "LICENSE": {"name": "MIT License", "url": "https://opensource.org/licenses/MIT"},
+    "SERVERS": [
         {"url": "http://127.0.0.1:8000", "description": "local server"},
         # {"url": "https://staging.yourproject.com", "description": "Staging server"},
     ],
-    
-    'SERVE_INCLUDE_SCHEMA': True,
-    'SCHEMA_PATH_PREFIX': '/api/v1',
-    'COMPONENT_SPLIT_REQUEST': True,
-    'SORT_OPERATIONS': True,
-    'SORT_OPERATION_PARAMETERS': True,
-    'APPEND_COMPONENTS': {},
-    
-    'ENUM_NAME_OVERRIDES': {},
-    'PREPROCESSING_HOOKS': [],
-    'POSTPROCESSING_HOOKS': [],
-    'SCHEMA_GENERATOR_CLASS': 'drf_spectacular.generators.SchemaGenerator',
-
-    'SWAGGER_UI_SETTINGS': {
-        'deepLinking': True,
-        'persistAuthorization': True,
-        'displayOperationId': True,
-        'defaultModelsExpandDepth': 2,
-        'defaultModelExpandDepth': 2,
-        'defaultModelRendering': 'example',
-        'docExpansion': 'list',
-        'filter': True,
-        'showExtensions': True,
-        'showCommonExtensions': True,
+    "SERVE_INCLUDE_SCHEMA": True,
+    "SCHEMA_PATH_PREFIX": "/api/v1",
+    "COMPONENT_SPLIT_REQUEST": True,
+    "SORT_OPERATIONS": True,
+    "SORT_OPERATION_PARAMETERS": True,
+    "APPEND_COMPONENTS": {},
+    "ENUM_NAME_OVERRIDES": {},
+    "PREPROCESSING_HOOKS": [],
+    "POSTPROCESSING_HOOKS": [],
+    "SCHEMA_GENERATOR_CLASS": "drf_spectacular.generators.SchemaGenerator",
+    "SWAGGER_UI_SETTINGS": {
+        "deepLinking": True,
+        "persistAuthorization": True,
+        "displayOperationId": True,
+        "defaultModelsExpandDepth": 2,
+        "defaultModelExpandDepth": 2,
+        "defaultModelRendering": "example",
+        "docExpansion": "list",
+        "filter": True,
+        "showExtensions": True,
+        "showCommonExtensions": True,
     },
-
-    'REDOC_SETTINGS': {
-        'expandResponses': '200,201',
-        'hideDownloadButton': False,
-        'pathInMiddlePanel': True,
-        'theme': {
-            'spacing.unit': 8,
-            'colors.primary.main': '#2E86C1',
+    "REDOC_SETTINGS": {
+        "expandResponses": "200,201",
+        "hideDownloadButton": False,
+        "pathInMiddlePanel": True,
+        "theme": {
+            "spacing.unit": 8,
+            "colors.primary.main": "#2E86C1",
         },
-    }
-    
+    },
 }
 
 
@@ -271,7 +273,6 @@ SIMPLE_JWT = {
     "ROTATE_REFRESH_TOKENS": not DEBUG,  # Enable rotation in production
     "BLACKLIST_AFTER_ROTATION": not DEBUG,
     "UPDATE_LAST_LOGIN": False,
-
     # Cookie settings
     "AUTH_COOKIE": "access_token",
     "AUTH_COOKIE_REFRESH": "refresh_token",
@@ -280,7 +281,9 @@ SIMPLE_JWT = {
     "AUTH_COOKIE_HTTP_ONLY": True,
     "AUTH_COOKIE_PATH": "/",
     "AUTH_COOKIE_SAMESITE": config("AUTH_COOKIE_SAMESITE", default="Lax"),
-    "AUTH_CSRF_AUTHENTICATION": config("AUTH_CSRF_AUTHENTICATION", cast=bool, default=False),
+    "AUTH_CSRF_AUTHENTICATION": config(
+        "AUTH_CSRF_AUTHENTICATION", cast=bool, default=False
+    ),
     "CHECK_REVOKE_TOKEN": True,
 }
 

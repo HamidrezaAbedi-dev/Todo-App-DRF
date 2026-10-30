@@ -1,4 +1,3 @@
-
 from django.utils import timezone
 from rest_framework import serializers
 from apps.todos.models import Task
@@ -8,6 +7,7 @@ class TasksListCreateSerializer(serializers.ModelSerializer):
     """
     Serializer for listing tasks and creating new tasks.
     """
+
     user = serializers.ReadOnlyField(source="user.id")
 
     class Meta:
@@ -26,9 +26,7 @@ class TasksListCreateSerializer(serializers.ModelSerializer):
 
         # Ensure the due date is not in the past.
         if value is not None and value < timezone.now():
-            raise serializers.ValidationError(
-                "The due date cannot be in the past."
-            )
+            raise serializers.ValidationError("The due date cannot be in the past.")
 
         return value
 
@@ -37,6 +35,7 @@ class TaskDetailSerializer(serializers.ModelSerializer):
     """
     Serializer for retrieving, updating, and deleting task details.
     """
+
     user = serializers.ReadOnlyField(source="user.id")
 
     class Meta:
@@ -63,9 +62,7 @@ class TaskDetailSerializer(serializers.ModelSerializer):
 
         # Ensure the due date is not in the past.
         if value is not None and value < timezone.now():
-            raise serializers.ValidationError(
-                "The due date cannot be in the past."
-            )
+            raise serializers.ValidationError("The due date cannot be in the past.")
 
         return value
 
@@ -74,6 +71,7 @@ class DeletedTaskSerializer(serializers.ModelSerializer):
     """
     Serializer for the authenticated user's deleted task history.
     """
+
     user = serializers.ReadOnlyField(source="user.id")
 
     class Meta:
@@ -97,6 +95,7 @@ class BulkTaskSerializer(serializers.Serializer):
     """
     Validate task IDs for bulk operations.
     """
+
     ids = serializers.ListField(
         child=serializers.IntegerField(min_value=1),
         allow_empty=False,
@@ -104,11 +103,9 @@ class BulkTaskSerializer(serializers.Serializer):
     )
 
     def validate_ids(self, value):
-        
+
         # Reject duplicate task IDs.
         if len(value) != len(set(value)):
-            raise serializers.ValidationError(
-                "Duplicate task IDs are not allowed."
-            )
+            raise serializers.ValidationError("Duplicate task IDs are not allowed.")
 
         return value

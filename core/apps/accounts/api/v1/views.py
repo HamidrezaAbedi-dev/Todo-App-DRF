@@ -1,12 +1,17 @@
 from rest_framework.generics import (
-    CreateAPIView, GenericAPIView, RetrieveUpdateAPIView,
+    CreateAPIView,
+    GenericAPIView,
+    RetrieveUpdateAPIView,
 )
 from django.middleware.csrf import get_token
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import (
-    TokenObtainPairView, TokenRefreshView, TokenVerifyView, TokenBlacklistView,
+    TokenObtainPairView,
+    TokenRefreshView,
+    TokenVerifyView,
+    TokenBlacklistView,
 )
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -48,9 +53,7 @@ class CSRFTokenAPIView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
-        return Response({
-            "csrfToken": get_token(request)
-        })
+        return Response({"csrfToken": get_token(request)})
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
@@ -119,9 +122,7 @@ class CustomTokenRefreshView(TokenRefreshView):
         data = request.data.copy()
 
         if web_client:
-            refresh_token = request.COOKIES.get(
-                get_refresh_cookie_name()
-            )
+            refresh_token = request.COOKIES.get(get_refresh_cookie_name())
 
             if not refresh_token:
                 return Response(
@@ -196,9 +197,7 @@ class CustomTokenVerifyView(TokenVerifyView):
         data = request.data.copy()
 
         if is_web_client(request):
-            access_token = request.COOKIES.get(
-                get_access_cookie_name()
-            )
+            access_token = request.COOKIES.get(get_access_cookie_name())
 
             if not access_token:
                 return Response(
@@ -239,9 +238,7 @@ class CustomTokenBlacklistView(TokenBlacklistView):
             enforce_csrf(request)
 
         if web_client:
-            refresh_token = request.COOKIES.get(
-                get_refresh_cookie_name()
-            )
+            refresh_token = request.COOKIES.get(get_refresh_cookie_name())
         else:
             refresh_token = request.data.get("refresh")
 
@@ -260,12 +257,7 @@ class CustomTokenBlacklistView(TokenBlacklistView):
 
         if not revoked:
             response = Response(
-                {
-                    "detail": (
-                        "Refresh token is invalid or "
-                        "could not be revoked."
-                    )
-                },
+                {"detail": ("Refresh token is invalid or " "could not be revoked.")},
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 
@@ -377,9 +369,7 @@ class DeleteUserDestroyAPIView(APIView):
 
         # Get the current refresh token using the same logic as logout.
         if web_client:
-            refresh_token = request.COOKIES.get(
-                get_refresh_cookie_name()
-            )
+            refresh_token = request.COOKIES.get(get_refresh_cookie_name())
         else:
             refresh_token = request.data.get("refresh")
 

@@ -1,4 +1,3 @@
-
 from django.conf import settings
 from django.middleware.csrf import CsrfViewMiddleware
 
@@ -48,9 +47,7 @@ class CookieJWTAuthentication(JWTAuthentication):
         if header is not None:
             raw_token = self.get_raw_token(header)
         else:
-            raw_token = request.COOKIES.get(
-                settings.SIMPLE_JWT["AUTH_COOKIE"]
-            )
+            raw_token = request.COOKIES.get(settings.SIMPLE_JWT["AUTH_COOKIE"])
 
         if raw_token is None:
             return None

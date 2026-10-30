@@ -59,9 +59,7 @@ def test_task_endpoints_require_authentication(client, method, url, data):
 
 
 @pytest.mark.django_db
-def test_create_list_retrieve_update_and_soft_delete_task(
-    authenticated_client, user
-):
+def test_create_list_retrieve_update_and_soft_delete_task(authenticated_client, user):
     create_response = authenticated_client.post(
         TASKS_URL,
         {
@@ -127,9 +125,10 @@ def test_task_endpoints_only_expose_the_owners_tasks(
     list_response = authenticated_client.get(TASKS_URL)
     assert list_response.data["total"] == 1
     assert list_response.data["results"][0]["id"] == own_task.pk
-    assert authenticated_client.get(
-        TASK_DETAIL_URL.format(other_task.pk)
-    ).status_code == 404
+    assert (
+        authenticated_client.get(TASK_DETAIL_URL.format(other_task.pk)).status_code
+        == 404
+    )
 
 
 @pytest.mark.django_db
@@ -152,9 +151,7 @@ def test_create_task_rejects_invalid_fields(authenticated_client, payload):
 
 
 @pytest.mark.django_db
-def test_list_search_filter_ordering_and_pagination(
-    authenticated_client, user
-):
+def test_list_search_filter_ordering_and_pagination(authenticated_client, user):
     Task.objects.create(
         user=user,
         title="Buy groceries",
@@ -237,12 +234,9 @@ def test_list_rejects_invalid_filter_and_ordering(
 
 
 @pytest.mark.django_db
-def test_bulk_complete_updates_all_requested_owned_tasks(
-    authenticated_client, user
-):
+def test_bulk_complete_updates_all_requested_owned_tasks(authenticated_client, user):
     tasks = [
-        Task.objects.create(user=user, title=f"Task {index}")
-        for index in range(2)
+        Task.objects.create(user=user, title=f"Task {index}") for index in range(2)
     ]
 
     response = authenticated_client.patch(
@@ -260,12 +254,9 @@ def test_bulk_complete_updates_all_requested_owned_tasks(
 
 
 @pytest.mark.django_db
-def test_bulk_delete_soft_deletes_all_requested_owned_tasks(
-    authenticated_client, user
-):
+def test_bulk_delete_soft_deletes_all_requested_owned_tasks(authenticated_client, user):
     tasks = [
-        Task.objects.create(user=user, title=f"Task {index}")
-        for index in range(2)
+        Task.objects.create(user=user, title=f"Task {index}") for index in range(2)
     ]
     task_ids = [task.pk for task in tasks]
 
@@ -335,9 +326,12 @@ def test_deleted_task_can_be_restored_by_its_owner(
     assert response.data["id"] == deleted_task.pk
     deleted_task.refresh_from_db()
     assert deleted_task.deleted_at is None
-    assert authenticated_client.post(
-        TASK_DETAIL_URL.format(foreign_task.pk) + "restore/"
-    ).status_code == 404
+    assert (
+        authenticated_client.post(
+            TASK_DETAIL_URL.format(foreign_task.pk) + "restore/"
+        ).status_code
+        == 404
+    )
 
 
 @pytest.mark.django_db

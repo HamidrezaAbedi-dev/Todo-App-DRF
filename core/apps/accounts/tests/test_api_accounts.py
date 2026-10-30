@@ -100,9 +100,7 @@ def test_register_creates_user_and_profile(client):
         ("short", "short"),
     ],
 )
-def test_register_rejects_mismatched_or_weak_passwords(
-    client, password, confirmation
-):
+def test_register_rejects_mismatched_or_weak_passwords(client, password, confirmation):
     response = client.post(
         REGISTER_URL,
         {
@@ -115,9 +113,7 @@ def test_register_rejects_mismatched_or_weak_passwords(
 
     assert response.status_code == 400
 
-    assert not User.objects.filter(
-        email="invalid@example.com"
-    ).exists()
+    assert not User.objects.filter(email="invalid@example.com").exists()
 
 
 @pytest.mark.django_db
@@ -162,9 +158,7 @@ def test_app_login_verify_refresh_and_logout(client, user):
     )
 
     assert verify_response.status_code == 200
-    assert verify_response.data == {
-        "detail": "Token is valid."
-    }
+    assert verify_response.data == {"detail": "Token is valid."}
 
     # Refresh tokens
     refresh_response = client.post(
@@ -294,9 +288,7 @@ def test_web_authentication_uses_http_only_cookies(csrf_client, user):
 
 
 @pytest.mark.django_db
-def test_web_cookie_authentication_requires_csrf_for_unsafe_requests(
-    csrf_client, user
-):
+def test_web_cookie_authentication_requires_csrf_for_unsafe_requests(csrf_client, user):
     headers = prepare_web_client(csrf_client)
 
     # Login to receive authentication cookies.
@@ -496,9 +488,7 @@ def test_password_change_revokes_all_refresh_tokens_and_old_access_token(
     assert outstanding_tokens.exists()
 
     for outstanding_token in outstanding_tokens:
-        assert BlacklistedToken.objects.filter(
-            token=outstanding_token
-        ).exists()
+        assert BlacklistedToken.objects.filter(token=outstanding_token).exists()
 
     # The old refresh token must no longer work.
     old_refresh_response = client.post(
@@ -539,9 +529,7 @@ def test_password_change_revokes_all_refresh_tokens_and_old_access_token(
 
 
 @pytest.mark.django_db
-def test_delete_account_removes_user_and_profile(
-    authenticated_client, user
-):
+def test_delete_account_removes_user_and_profile(authenticated_client, user):
     response = authenticated_client.delete(DELETE_ACCOUNT_URL)
 
     assert response.status_code == 204

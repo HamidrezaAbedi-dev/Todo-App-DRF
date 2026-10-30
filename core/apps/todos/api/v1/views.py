@@ -15,7 +15,9 @@ from rest_framework.permissions import IsAuthenticated
 from apps.todos.models import Task
 from apps.todos.api.utils.paginations import DefaultPagination
 from apps.todos.api.utils.filters import (
-    TaskFilter, StrictDjangoFilterBackend, StrictOrderingFilter,
+    TaskFilter,
+    StrictDjangoFilterBackend,
+    StrictOrderingFilter,
 )
 from .serializers import (
     TasksListCreateSerializer,
@@ -29,13 +31,18 @@ class TasksListCreateAPIView(ListCreateAPIView):
     """
     List the authenticated user's tasks and create new tasks.
     """
+
     serializer_class = TasksListCreateSerializer
     pagination_class = DefaultPagination
     permission_classes = [IsAuthenticated]
-    filter_backends = [SearchFilter, StrictDjangoFilterBackend, StrictOrderingFilter,]
+    filter_backends = [
+        SearchFilter,
+        StrictDjangoFilterBackend,
+        StrictOrderingFilter,
+    ]
     search_fields = ["title", "description"]
     filterset_class = TaskFilter
-    ordering_fields= ["created_date", "updated_date", "due_date", "priority", "title"]
+    ordering_fields = ["created_date", "updated_date", "due_date", "priority", "title"]
 
     def get_queryset(self):
         # Return only tasks owned by the authenticated user.
@@ -50,6 +57,7 @@ class TaskRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     """
     Retrieve, update, or soft-delete an active task owned by the user.
     """
+
     serializer_class = TaskDetailSerializer
     permission_classes = [IsAuthenticated]
 
@@ -77,6 +85,7 @@ class DeletedTasksListAPIView(ListAPIView):
     """
     List the authenticated user's soft-deleted tasks.
     """
+
     serializer_class = DeletedTaskSerializer
     pagination_class = DefaultPagination
     permission_classes = [IsAuthenticated]
@@ -92,6 +101,7 @@ class RestoreDeletedTaskAPIView(GenericAPIView):
     """
     Restore a soft-deleted task owned by the authenticated user.
     """
+
     serializer_class = TaskDetailSerializer
     permission_classes = [IsAuthenticated]
 
@@ -114,6 +124,7 @@ class TaskStatisticsAPIView(GenericAPIView):
     """
     Return statistics for the authenticated user's tasks.
     """
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
@@ -146,10 +157,12 @@ class TaskStatisticsAPIView(GenericAPIView):
 
 # Bulk Operations
 
+
 class BulkCompleteTasksAPIView(GenericAPIView):
     """
     Mark multiple tasks as completed for the authenticated user.
     """
+
     serializer_class = BulkTaskSerializer
     permission_classes = [IsAuthenticated]
 
@@ -170,12 +183,14 @@ class BulkCompleteTasksAPIView(GenericAPIView):
             )
 
             if tasks.count() != len(task_ids):
-                raise serializers.ValidationError({
-                    "ids": (
-                        "One or more tasks were not found "
-                        "or do not belong to you."
-                    )
-                })
+                raise serializers.ValidationError(
+                    {
+                        "ids": (
+                            "One or more tasks were not found "
+                            "or do not belong to you."
+                        )
+                    }
+                )
 
             updated_count = tasks.update(
                 is_completed=True,
@@ -195,11 +210,12 @@ class BulkDeleteTasksAPIView(GenericAPIView):
     """
     Soft-delete multiple active tasks owned by the authenticated user.
     """
+
     serializer_class = BulkTaskSerializer
     permission_classes = [IsAuthenticated]
 
     def delete(self, request, *args, **kwargs):
-        
+
         # Soft-delete multiple active tasks owned by the user.
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -215,12 +231,14 @@ class BulkDeleteTasksAPIView(GenericAPIView):
             )
 
             if tasks.count() != len(task_ids):
-                raise serializers.ValidationError({
-                    "ids": (
-                        "One or more tasks were not found "
-                        "or do not belong to you."
-                    )
-                })
+                raise serializers.ValidationError(
+                    {
+                        "ids": (
+                            "One or more tasks were not found "
+                            "or do not belong to you."
+                        )
+                    }
+                )
 
             deleted_count = tasks.update(
                 deleted_at=now,

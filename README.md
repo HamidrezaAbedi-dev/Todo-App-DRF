@@ -594,6 +594,24 @@ docker compose exec backend python -m pytest apps/accounts/tests/
 docker compose exec backend python -m pytest apps/todos/tests/
 ```
 
+### بررسی خودکار در GitHub Actions
+
+Workflow فایل `.github/workflows/github-actions-cicd.yml` با هر push و
+برای Pull Requestهای مقصد `main` اجرا می‌شود. در یک job و به‌ترتیب:
+
+1. PostgreSQL 17 را برای اجرای تست‌ها آماده می‌کند.
+2. وابستگی‌های `core/requirements.txt` را با Python 3.13 نصب می‌کند.
+3. ابتدا `pytest` را اجرا می‌کند؛ در صورت شکست تست‌ها، مرحلهٔ بعد اجرا
+   نمی‌شود.
+4. فقط پس از موفقیت تست‌ها، `flake8` را روی کد پروژه اجرا می‌کند.
+
+GitHub Actions پس از push اجرا می‌شود؛ بنابراین نمی‌تواند پیش از ثبت
+commit در مخزن، خود push را متوقف کند. برای جلوگیری از ادغام تغییرات
+ناموفق در `main`، در تنظیمات مخزن برای شاخهٔ `main` یک branch protection
+rule بسازید و موفقیت check با نام `Run pytest, then Flake8` را به‌عنوان
+الزام ادغام (required status check) انتخاب کنید. Workflow به‌صورت خودکار
+commit جدیدی نمی‌سازد.
+
 ## راه‌اندازی با Docker Compose
 
 ### ۱. ساخت فایل محیطی
@@ -665,6 +683,30 @@ docker compose exec backend python -m pytest
 
 در تنظیمات فعلی Compose، پورت PostgreSQL روی میزبان منتشر نشده است و
 بک‌اند از طریق نام سرویس `db` در شبکه داخلی Docker به آن متصل می‌شود.
+
+### ساخت image تولید
+
+Dockerfile تولید از Python 3.13، وابستگی‌های `core/requirements.txt` و
+Gunicorn استفاده می‌کند. image چندمرحله‌ای است، ابزارهای کامپایل را فقط
+در مرحلهٔ ساخت نگه می‌دارد و برنامه را با کاربر غیر root اجرا می‌کند.
+
+``` powershell
+docker build -f dockerfiles/prod/Dockerfile -t todo-app-drf:latest .
+```
+
+هنگام اجرای image، متغیرهای محیطی production را جداگانه تنظیم کنید؛
+به‌خصوص `SECRET_KEY` قوی، `DEBUG=False`، `ALLOWED_HOSTS` محدود و
+اطلاعات اتصال PostgreSQL. فایل `.env.sample` صرفاً برای توسعه است و
+نباید در محیط واقعی استفاده شود. entrypoint با موفقیت‌محور بودن فرمان‌ها،
+migrationها را اجرا می‌کند، static files را جمع‌آوری و سپس فرمان کانتینر
+(به‌صورت پیش‌فرض Gunicorn) را اجرا می‌کند. فایل‌های static از طریق
+WhiteNoise سرو می‌شوند.
+
+فایل‌های آپلودی کاربر در `MEDIA_ROOT` ذخیره می‌شوند؛ برای نگهداری آن‌ها
+بین بازسازی یا حذف کانتینر، در زمان اجرا یک volume پایدار به مسیر
+`/usr/src/app/media` متصل کنید. برای استقرار چند replica، اجرای migration
+را به یک مرحلهٔ یک‌بارهٔ استقرار منتقل کنید و فایل‌های media را در storage
+مشترک یا object storage نگه دارید.
 
 ## مستندات API
 

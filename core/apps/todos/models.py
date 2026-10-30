@@ -17,9 +17,7 @@ class Task(models.Model):
         related_name="tasks",
     )
     title = models.CharField(max_length=100)
-    description = models.CharField(
-        max_length=1000, null=True, blank=True
-    )
+    description = models.CharField(max_length=1000, null=True, blank=True)
     is_completed = models.BooleanField(default=False)
     priority = models.CharField(
         max_length=6,
@@ -33,11 +31,12 @@ class Task(models.Model):
 
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
-    deleted_at = models.DateTimeField(null=True, blank=True,)
+    deleted_at = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         indexes = [
-            models.Index(
-                fields=["user", "is_completed"]
-            ),
+            models.Index(fields=["user", "is_completed"]),
         ]
