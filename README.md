@@ -130,61 +130,79 @@ Todo-App-DRF یک API نسخه‌بندی‌شده برای مدیریت وظا�
 
 ``` text
 Todo-App-DRF/
+├── .github/
+│   └── workflows/
+│       └── github-actions-cicd.yml
 ├── core/
-│   ├── core/
-│   │   ├── settings.py
-│   │   └── urls.py
-│   ├── templates/
-│   │   ├── base.html
-│   │   ├── accounts/
-│   │   └── todos/
-│   ├── staticfiles/
-│   │   ├── css/
-│   │   │   └── app.css
-│   │   ├── js/
-│   │   │   └── app.js
-│   │   └── img/
-│   │       └── profile/default.png
 │   ├── apps/
 │   │   ├── accounts/
 │   │   │   ├── api/
 │   │   │   │   ├── utils/
 │   │   │   │   └── v1/
-│   │   │   │       ├── serializers.py
-│   │   │   │       ├── urls.py
-│   │   │   │       └── views.py
 │   │   │   ├── migrations/
 │   │   │   ├── tests/
-│   │   │   ├── models.py
+│   │   │   ├── messages.py
 │   │   │   ├── admin.py
+│   │   │   ├── apps.py
+│   │   │   ├── models.py
 │   │   │   ├── urls.py
 │   │   │   └── views.py
 │   │   └── todos/
 │   │       ├── api/
 │   │       │   ├── utils/
 │   │       │   └── v1/
-│   │       │       ├── serializers.py
-│   │       │       ├── urls.py
-│   │       │       └── views.py
 │   │       ├── migrations/
 │   │       ├── tests/
-│   │       ├── models.py
 │   │       ├── admin.py
+│   │       ├── apps.py
+│   │       ├── models.py
 │   │       ├── urls.py
 │   │       └── views.py
+│   ├── core/
+│   │   ├── asgi.py
+│   │   ├── settings.py
+│   │   ├── urls.py
+│   │   └── wsgi.py
+│   ├── templates/
+│   │   ├── base.html
+│   │   ├── accounts/
+│   │   │   ├── change_password.html
+│   │   │   ├── login.html
+│   │   │   ├── register.html
+│   │   │   └── user_profile.html
+│   │   └── todos/
+│   │       └── index.html
+│   ├── staticfiles/
+│   │   ├── css/
+│   │   │   └── app.css
+│   │   ├── img/profile/
+│   │   │   └── default.png
+│   │   └── js/
+│   │       └── app.js
+│   ├── media/img/profile/          # فایل‌های آپلودشده
+│   ├── .flake8
 │   ├── manage.py
-│   └── media/                 # فایل‌های آپلودشده در زمان اجرا
+│   ├── pytest.ini
+│   └── requirements.txt
 ├── dockerfiles/
-│   └── dev/django/Dockerfile
+│   ├── dev/django/Dockerfile
+│   └── prod/
+│       ├── Dockerfile
+│       └── entrypoint.sh
 ├── envs/
 │   └── dev/django/.env.sample
 ├── docs/
+│   ├── .gitkeep
 │   ├── database_schema.png
-│   ├── PROJECT_GUIDE_FA.md
+│   ├── database_schema_help.txt
 │   └── Your Project API.yaml
-├── requirements.txt
+├── postgres/data/                  # محل نگهداری دادهٔ PostgreSQL در Compose
+├── .gitattributes
+├── .gitignore
 ├── docker-compose.yml
-└── README.md
+├── LICENSE
+├── README.md
+└── requirements.txt
 ```
 
 تنظیمات `STATICFILES_DIRS` به `core/staticfiles/` اشاره می‌کند. فایل
