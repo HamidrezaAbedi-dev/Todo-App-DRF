@@ -48,6 +48,9 @@ class StrictOrderingFilter(OrderingFilter):
             allowed_fields = set(self.get_valid_fields(
                 queryset, view, {"request": request}
             ))
+            allowed_field_names = {
+                field[0] for field in allowed_fields
+            }
 
             requested_fields = [
                 field.strip()
@@ -57,7 +60,7 @@ class StrictOrderingFilter(OrderingFilter):
             for field in requested_fields:
                 field_name = field.lstrip("-")
 
-                if not field_name or field_name not in allowed_fields:
+                if not field_name or field_name not in allowed_field_names:
                     raise CustomValidationException(
                         code="INVALID_SORT_FIELD",
                         message="Invalid sort field",

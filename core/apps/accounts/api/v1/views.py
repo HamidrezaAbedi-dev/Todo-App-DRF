@@ -100,7 +100,13 @@ class CustomTokenRefreshView(TokenRefreshView):
             data["refresh"] = refresh_token
 
         serializer = self.get_serializer(data=data)
-        serializer.is_valid(raise_exception=True)
+        try:
+            serializer.is_valid(raise_exception=True)
+        except TokenError:
+            return Response(
+                {"detail": "Refresh token is invalid or expired."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
 
         token_data = dict(serializer.validated_data)
 
@@ -311,6 +317,7 @@ class CurrentUserProfileView(RetrieveUpdateAPIView):
     """
     serializer_class = ProfileSerializer
     queryset = Profile.objects.all()
+    permission_classes = (IsAuthenticated,)
 
     def get_object(self):
         queryset = self.get_queryset()

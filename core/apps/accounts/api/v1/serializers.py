@@ -44,7 +44,9 @@ class RegisterSerializer(serializers.ModelSerializer):
         
         if User.objects.filter(email=attrs.get("email")).exists():
             raise CustomValidationException(
-                {"detail": Messages.user_already_exists})
+                code="USER_ALREADY_EXISTS",
+                message=Messages.user_already_exists,
+            )
         
         return super().validate(attrs)
 
@@ -80,12 +82,14 @@ class ChangePasswordSerializer(serializers.Serializer):
 
         if not user.check_password(attrs["old_password"]):
             raise CustomValidationException(
-                {"detail": Messages.old_password_doenst_match}
+                code="INVALID_OLD_PASSWORD",
+                message=Messages.old_password_doenst_match,
             )
 
         if attrs["new_password"] != attrs["new_password1"]:
             raise CustomValidationException(
-                {"detail": Messages.new_password_doenst_match}
+                code="PASSWORD_MISMATCH",
+                message=Messages.new_password_doenst_match,
             )
 
         if attrs["old_password"] == attrs["new_password"]:
@@ -121,4 +125,3 @@ class ProfileSerializer(serializers.ModelSerializer):
             return value
 
         return sanitize_profile_image(value)
-
