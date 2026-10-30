@@ -1,0 +1,1022 @@
+openapi: 3.0.3
+info:
+  title: Your Project API
+  version: 1.0.0
+  description: Comprehensive documentation for Your Project API, including all endpoints,
+    data models, and authentication mechanisms.
+  termsOfService: https://yourproject.com/terms/
+  contact:
+    name: API Support
+    url: https://yourproject.com/support
+    email: support@yourproject.com
+  license:
+    name: MIT License
+    url: https://opensource.org/licenses/MIT
+paths:
+  /accounts/api/v1/change-password/:
+    patch:
+      operationId: accounts_api_v1_change_password_partial_update
+      description: |-
+        Change the authenticated user's password.
+
+        - Web: read the refresh token from the cookie, revoke it,
+            and clear authentication cookies.
+        - App: optionally revoke the refresh token supplied in JSON.
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedChangePasswordRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedChangePasswordRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedChangePasswordRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /accounts/api/v1/login/:
+    post:
+      operationId: accounts_api_v1_login_create
+      description: |-
+        Login:
+        - Web: set HttpOnly cookies and omit tokens from JSON.
+        - App: return tokens in the default Simple JWT JSON response.
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenObtainPair'
+          description: ''
+  /accounts/api/v1/logout/:
+    post:
+      operationId: accounts_api_v1_logout_create
+      description: |-
+        Logout:
+        - Web: blacklist the refresh cookie and clear authentication cookies.
+        - App: blacklist the refresh token supplied in JSON.
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenBlacklistRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenBlacklistRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenBlacklistRequest'
+        required: true
+      responses:
+        '200':
+          description: No response body
+  /accounts/api/v1/refresh-token/:
+    post:
+      operationId: accounts_api_v1_refresh_token_create
+      description: |-
+        Refresh:
+        - Web: read the refresh token from its cookie, rotate cookies
+            when configured, and omit tokens from JSON.
+        - App: accept refresh in JSON and return the default JSON response.
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /accounts/api/v1/register/:
+    post:
+      operationId: accounts_api_v1_register_create
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Register'
+          description: ''
+  /accounts/api/v1/session/verify/:
+    post:
+      operationId: accounts_api_v1_session_verify_create
+      description: |-
+        Verify:
+        - Web: read the token from the access cookie.
+        - App: read the token from the JSON body.
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenVerifyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenVerifyRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenVerifyRequest'
+        required: true
+      responses:
+        '200':
+          description: No response body
+  /accounts/api/v1/users/me/:
+    get:
+      operationId: accounts_api_v1_users_me_retrieve
+      description: Retrieve or update the authenticated user's profile.
+      tags:
+      - accounts
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+          description: ''
+    put:
+      operationId: accounts_api_v1_users_me_update
+      description: Retrieve or update the authenticated user's profile.
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProfileRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProfileRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+          description: ''
+    patch:
+      operationId: accounts_api_v1_users_me_partial_update
+      description: Retrieve or update the authenticated user's profile.
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProfileRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProfileRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProfileRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+          description: ''
+  /accounts/api/v1/users/me/delete-account/:
+    delete:
+      operationId: accounts_api_v1_users_me_delete_account_destroy
+      description: |-
+        Delete the authenticated user's account.
+
+        - Revoke the current refresh token when provided.
+        - Revoke all outstanding refresh tokens associated with the user.
+        - Delete the user and related objects.
+        - Clear authentication cookies for web clients.
+      tags:
+      - accounts
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /schema/:
+    get:
+      operationId: schema_retrieve
+      description: |-
+        OpenApi3 schema for this API. Format can be selected via content negotiation.
+
+        - YAML: application/vnd.oai.openapi
+        - JSON: application/vnd.oai.openapi+json
+      parameters:
+      - in: query
+        name: format
+        schema:
+          type: string
+          enum:
+          - json
+          - yaml
+      - in: query
+        name: lang
+        schema:
+          type: string
+          enum:
+          - af
+          - ar
+          - ar-dz
+          - ast
+          - az
+          - be
+          - bg
+          - bn
+          - br
+          - bs
+          - ca
+          - ckb
+          - cs
+          - cy
+          - da
+          - de
+          - dsb
+          - el
+          - en
+          - en-au
+          - en-gb
+          - eo
+          - es
+          - es-ar
+          - es-co
+          - es-mx
+          - es-ni
+          - es-ve
+          - et
+          - eu
+          - fa
+          - fi
+          - fr
+          - fy
+          - ga
+          - gd
+          - gl
+          - he
+          - hi
+          - hr
+          - hsb
+          - ht
+          - hu
+          - hy
+          - ia
+          - id
+          - ig
+          - io
+          - is
+          - it
+          - ja
+          - ka
+          - kab
+          - kk
+          - km
+          - kn
+          - ko
+          - ky
+          - lb
+          - lt
+          - lv
+          - mk
+          - ml
+          - mn
+          - mr
+          - ms
+          - my
+          - nb
+          - ne
+          - nl
+          - nn
+          - os
+          - pa
+          - pl
+          - pt
+          - pt-br
+          - ro
+          - ru
+          - sk
+          - sl
+          - sq
+          - sr
+          - sr-latn
+          - sv
+          - sw
+          - ta
+          - te
+          - tg
+          - th
+          - tk
+          - tr
+          - tt
+          - udm
+          - ug
+          - uk
+          - ur
+          - uz
+          - vi
+          - zh-hans
+          - zh-hant
+      tags:
+      - schema
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/vnd.oai.openapi:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/yaml:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/vnd.oai.openapi+json:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /todos/api/v1/task/{id}/:
+    get:
+      operationId: todos_api_v1_task_retrieve
+      description: Retrieve, update, or soft-delete an active task owned by the user.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - todos
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskDetail'
+          description: ''
+    put:
+      operationId: todos_api_v1_task_update
+      description: Retrieve, update, or soft-delete an active task owned by the user.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - todos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskDetailRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TaskDetailRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TaskDetailRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskDetail'
+          description: ''
+    patch:
+      operationId: todos_api_v1_task_partial_update
+      description: Retrieve, update, or soft-delete an active task owned by the user.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - todos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTaskDetailRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedTaskDetailRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedTaskDetailRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskDetail'
+          description: ''
+    delete:
+      operationId: todos_api_v1_task_destroy
+      description: Retrieve, update, or soft-delete an active task owned by the user.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - todos
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /todos/api/v1/task/bulk-complete/:
+    patch:
+      operationId: todos_api_v1_task_bulk_complete_partial_update
+      description: Validate ownership and complete all requested tasks.
+      tags:
+      - todos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBulkTaskRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBulkTaskRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBulkTaskRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkTask'
+          description: ''
+  /todos/api/v1/task/bulk-delete/:
+    delete:
+      operationId: todos_api_v1_task_bulk_delete_destroy
+      description: Soft-delete multiple active tasks owned by the authenticated user.
+      tags:
+      - todos
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /todos/api/v1/task/stats/:
+    get:
+      operationId: todos_api_v1_task_stats_retrieve
+      description: Return statistics for the authenticated user's tasks.
+      tags:
+      - todos
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /todos/api/v1/tasks-list/:
+    get:
+      operationId: todos_api_v1_tasks_list_list
+      description: List the authenticated user's tasks and create new tasks.
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - todos
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTasksListCreateList'
+          description: ''
+    post:
+      operationId: todos_api_v1_tasks_list_create
+      description: List the authenticated user's tasks and create new tasks.
+      tags:
+      - todos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TasksListCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TasksListCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TasksListCreateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TasksListCreate'
+          description: ''
+components:
+  schemas:
+    BulkTask:
+      type: object
+      description: Validate task IDs for bulk operations.
+      properties:
+        ids:
+          type: array
+          items:
+            type: integer
+            minimum: 1
+          maxItems: 100
+      required:
+      - ids
+    PaginatedTasksListCreateList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/TasksListCreate'
+    PatchedBulkTaskRequest:
+      type: object
+      description: Validate task IDs for bulk operations.
+      properties:
+        ids:
+          type: array
+          items:
+            type: integer
+            minimum: 1
+          maxItems: 100
+    PatchedChangePasswordRequest:
+      type: object
+      description: Serializer for changing the authenticated user's password.
+      properties:
+        old_password:
+          type: string
+          writeOnly: true
+          minLength: 1
+        new_password:
+          type: string
+          writeOnly: true
+          minLength: 1
+        new_password1:
+          type: string
+          writeOnly: true
+          minLength: 1
+    PatchedProfileRequest:
+      type: object
+      description: Serializer for retrieving and updating user profile information.
+      properties:
+        first_name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        last_name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        image:
+          type: string
+          format: binary
+          nullable: true
+    PatchedTaskDetailRequest:
+      type: object
+      description: Serializer for retrieving, updating, and deleting task details.
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+          maxLength: 1000
+        is_completed:
+          type: boolean
+        priority:
+          enum:
+          - low
+          - medium
+          - high
+          type: string
+          description: |-
+            * `low` - Low
+            * `medium` - Medium
+            * `high` - High
+          x-spec-enum-id: 3cd2babd9a875ec3
+        due_date:
+          type: string
+          format: date-time
+          nullable: true
+    Profile:
+      type: object
+      description: Serializer for retrieving and updating user profile information.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        email:
+          type: string
+          readOnly: true
+        first_name:
+          type: string
+          maxLength: 255
+        last_name:
+          type: string
+          maxLength: 255
+        image:
+          type: string
+          format: uri
+          nullable: true
+        updated_date:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - email
+      - first_name
+      - id
+      - last_name
+      - updated_date
+    ProfileRequest:
+      type: object
+      description: Serializer for retrieving and updating user profile information.
+      properties:
+        first_name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        last_name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        image:
+          type: string
+          format: binary
+          nullable: true
+      required:
+      - first_name
+      - last_name
+    Register:
+      type: object
+      description: Registration serializer with password checkup
+      properties:
+        email:
+          type: string
+          format: email
+      required:
+      - email
+    RegisterRequest:
+      type: object
+      description: Registration serializer with password checkup
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 6
+          maxLength: 68
+        password1:
+          type: string
+          writeOnly: true
+          minLength: 6
+          maxLength: 68
+      required:
+      - email
+      - password
+      - password1
+    TaskDetail:
+      type: object
+      description: Serializer for retrieving, updating, and deleting task details.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+          maxLength: 1000
+        is_completed:
+          type: boolean
+        priority:
+          enum:
+          - low
+          - medium
+          - high
+          type: string
+          description: |-
+            * `low` - Low
+            * `medium` - Medium
+            * `high` - High
+          x-spec-enum-id: 3cd2babd9a875ec3
+        due_date:
+          type: string
+          format: date-time
+          nullable: true
+        created_date:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_date:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_date
+      - id
+      - title
+      - updated_date
+      - user
+    TaskDetailRequest:
+      type: object
+      description: Serializer for retrieving, updating, and deleting task details.
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+          maxLength: 1000
+        is_completed:
+          type: boolean
+        priority:
+          enum:
+          - low
+          - medium
+          - high
+          type: string
+          description: |-
+            * `low` - Low
+            * `medium` - Medium
+            * `high` - High
+          x-spec-enum-id: 3cd2babd9a875ec3
+        due_date:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - title
+    TasksListCreate:
+      type: object
+      description: Serializer for listing tasks and creating new tasks.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+          maxLength: 1000
+        is_completed:
+          type: boolean
+        priority:
+          enum:
+          - low
+          - medium
+          - high
+          type: string
+          description: |-
+            * `low` - Low
+            * `medium` - Medium
+            * `high` - High
+          x-spec-enum-id: 3cd2babd9a875ec3
+        due_date:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - id
+      - title
+      - user
+    TasksListCreateRequest:
+      type: object
+      description: Serializer for listing tasks and creating new tasks.
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+          maxLength: 1000
+        is_completed:
+          type: boolean
+        priority:
+          enum:
+          - low
+          - medium
+          - high
+          type: string
+          description: |-
+            * `low` - Low
+            * `medium` - Medium
+            * `high` - High
+          x-spec-enum-id: 3cd2babd9a875ec3
+        due_date:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - title
+    TokenBlacklistRequest:
+      type: object
+      properties:
+        refresh:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - refresh
+    TokenObtainPair:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          readOnly: true
+      required:
+      - access
+      - refresh
+    TokenObtainPairRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          writeOnly: true
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - email
+      - password
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+      required:
+      - access
+    TokenRefreshRequest:
+      type: object
+      properties:
+        refresh:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - refresh
+    TokenVerifyRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - token
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+servers:
+- url: http://127.0.0.1:8000
+  description: local server
