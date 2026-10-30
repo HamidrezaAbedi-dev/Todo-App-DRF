@@ -70,6 +70,29 @@ class TaskDetailSerializer(serializers.ModelSerializer):
         return value
 
 
+class DeletedTaskSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the authenticated user's deleted task history.
+    """
+    user = serializers.ReadOnlyField(source="user.id")
+
+    class Meta:
+        model = Task
+        fields = [
+            "id",
+            "user",
+            "title",
+            "description",
+            "is_completed",
+            "priority",
+            "due_date",
+            "created_date",
+            "updated_date",
+            "deleted_at",
+        ]
+        read_only_fields = fields
+
+
 class BulkTaskSerializer(serializers.Serializer):
     """
     Validate task IDs for bulk operations.

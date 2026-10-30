@@ -19,9 +19,9 @@ paths:
       description: |-
         Change the authenticated user's password.
 
-        - Web: read the refresh token from the cookie, revoke it,
-            and clear authentication cookies.
-        - App: optionally revoke the refresh token supplied in JSON.
+        - Revoke all outstanding refresh tokens associated with the user.
+        - Invalidate existing access tokens when CHECK_REVOKE_TOKEN is enabled.
+        - Clear authentication cookies for web clients.
       tags:
       - accounts
       requestBody:
@@ -35,8 +35,16 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/PatchedChangePasswordRequest'
+      responses:
+        '200':
+          description: No response body
+  /accounts/api/v1/csrf/:
+    get:
+      operationId: accounts_api_v1_csrf_retrieve
+      tags:
+      - accounts
       security:
-      - jwtAuth: []
+      - {}
       responses:
         '200':
           description: No response body
@@ -139,7 +147,6 @@ paths:
               $ref: '#/components/schemas/RegisterRequest'
         required: true
       security:
-      - jwtAuth: []
       - {}
       responses:
         '201':
@@ -178,8 +185,6 @@ paths:
       description: Retrieve or update the authenticated user's profile.
       tags:
       - accounts
-      security:
-      - jwtAuth: []
       responses:
         '200':
           content:
@@ -204,8 +209,6 @@ paths:
             schema:
               $ref: '#/components/schemas/ProfileRequest'
         required: true
-      security:
-      - jwtAuth: []
       responses:
         '200':
           content:
@@ -229,8 +232,6 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/PatchedProfileRequest'
-      security:
-      - jwtAuth: []
       responses:
         '200':
           content:
@@ -250,8 +251,6 @@ paths:
         - Clear authentication cookies for web clients.
       tags:
       - accounts
-      security:
-      - jwtAuth: []
       responses:
         '204':
           description: No response body
@@ -379,7 +378,6 @@ paths:
       tags:
       - schema
       security:
-      - jwtAuth: []
       - {}
       responses:
         '200':
@@ -413,8 +411,6 @@ paths:
         required: true
       tags:
       - todos
-      security:
-      - jwtAuth: []
       responses:
         '200':
           content:
@@ -445,8 +441,6 @@ paths:
             schema:
               $ref: '#/components/schemas/TaskDetailRequest'
         required: true
-      security:
-      - jwtAuth: []
       responses:
         '200':
           content:
@@ -476,8 +470,6 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/PatchedTaskDetailRequest'
-      security:
-      - jwtAuth: []
       responses:
         '200':
           content:
@@ -496,8 +488,6 @@ paths:
         required: true
       tags:
       - todos
-      security:
-      - jwtAuth: []
       responses:
         '204':
           description: No response body
@@ -518,8 +508,6 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/PatchedBulkTaskRequest'
-      security:
-      - jwtAuth: []
       responses:
         '200':
           content:
@@ -533,8 +521,6 @@ paths:
       description: Soft-delete multiple active tasks owned by the authenticated user.
       tags:
       - todos
-      security:
-      - jwtAuth: []
       responses:
         '204':
           description: No response body
@@ -544,8 +530,6 @@ paths:
       description: Return statistics for the authenticated user's tasks.
       tags:
       - todos
-      security:
-      - jwtAuth: []
       responses:
         '200':
           description: No response body
@@ -580,8 +564,6 @@ paths:
           type: string
       tags:
       - todos
-      security:
-      - jwtAuth: []
       responses:
         '200':
           content:
@@ -606,8 +588,6 @@ paths:
             schema:
               $ref: '#/components/schemas/TasksListCreateRequest'
         required: true
-      security:
-      - jwtAuth: []
       responses:
         '201':
           content:
@@ -1012,11 +992,6 @@ components:
           minLength: 1
       required:
       - token
-  securitySchemes:
-    jwtAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
 servers:
 - url: http://127.0.0.1:8000
   description: local server

@@ -1,0 +1,18 @@
+{% load static %}
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f5f7fb">
+    <title>{% block title %}Todo App | مدیریت کارها{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script defer src="{% static 'js/app.js' %}"></script>
+    {% block head %}{% endblock %}
+</head>
+<body data-page="{% block page_name %}{% endblock %}">
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    {% block content %}{% endblock %}
+</body>
+</html>

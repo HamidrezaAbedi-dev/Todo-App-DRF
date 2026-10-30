@@ -15,6 +15,16 @@ urlpatterns = [
         name="task-detail",
     ),
     path(
+        "task/history/",
+        views.DeletedTasksListAPIView.as_view(),
+        name="task-history",
+    ),
+    path(
+        "task/<int:pk>/restore/",
+        views.RestoreDeletedTaskAPIView.as_view(),
+        name="task-restore",
+    ),
+    path(
         "task/bulk-complete/",
         views.BulkCompleteTasksAPIView.as_view(),
         name="task-bulk-complete",

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}ورود | Todo App{% endblock %}
+{% block page_name %}login{% endblock %}
+{% block content %}
+<main class="auth-layout">
+    <section class="auth-aside">
+        <a class="brand brand-light" href="{% url 'todos:todo' %}"><span class="brand-mark">T</span><span dir="ltr">Todo App</span></a>
+        <div class="auth-message">
+            <span class="eyebrow">یک قدم تا تمرکز بیشتر</span>
+            <h1>کارهای مهمت را<br>با خیال راحت پیش ببر.</h1>
+            <p>برنامه‌ریزی ساده، روزهای پربازده‌تر.</p>
+        </div>
+        <div class="aside-decoration" aria-hidden="true"><span>✓</span><span>✦</span><span>↗</span></div>
+    </section>
+    <section class="auth-main">
+        <div class="auth-card">
+            <a class="brand brand-mobile" href="{% url 'todos:todo' %}"><span class="brand-mark">T</span><span dir="ltr">Todo App</span></a>
+            <span class="eyebrow">خوش برگشتی</span>
+            <h2>ورود به حساب</h2>
+            <p class="muted">برای ادامه، اطلاعات حسابت را وارد کن.</p>
+            <form id="login-form" class="form-stack">
+                <label for="login-email">ایمیل</label>
+                <input id="login-email" name="email" type="email" autocomplete="email" placeholder="name@example.com" required>
+                <label for="login-password">رمز عبور</label>
+                <input id="login-password" name="password" type="password" autocomplete="current-password" placeholder="رمز عبورت را وارد کن" required>
+                <button class="button button-primary button-wide" type="submit">ورود به Todo App <span aria-hidden="true">←</span></button>
+            </form>
+            <p class="auth-switch">حساب کاربری نداری؟ <a href="{% url 'accounts:registration' %}">ثبت‌نام کن</a></p>
+        </div>
+    </section>
+</main>
+{% endblock %}

@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import (
     ListCreateAPIView,
+    ListAPIView,
     RetrieveUpdateDestroyAPIView,
     GenericAPIView,
 )
@@ -17,7 +18,10 @@ from apps.todos.api.utils.filters import (
     TaskFilter, StrictDjangoFilterBackend, StrictOrderingFilter,
 )
 from .serializers import (
-    TasksListCreateSerializer, TaskDetailSerializer, BulkTaskSerializer
+    TasksListCreateSerializer,
+    TaskDetailSerializer,
+    DeletedTaskSerializer,
+    BulkTaskSerializer,
 )
 
 
@@ -67,6 +71,43 @@ class TaskRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
         instance.save(
             update_fields=["deleted_at", "updated_date"],
         )
+
+
+class DeletedTasksListAPIView(ListAPIView):
+    """
+    List the authenticated user's soft-deleted tasks.
+    """
+    serializer_class = DeletedTaskSerializer
+    pagination_class = DefaultPagination
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Task.objects.filter(
+            user=self.request.user,
+            deleted_at__isnull=False,
+        ).order_by("-deleted_at", "-pk")
+
+
+class RestoreDeletedTaskAPIView(GenericAPIView):
+    """
+    Restore a soft-deleted task owned by the authenticated user.
+    """
+    serializer_class = TaskDetailSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Task.objects.filter(
+            user=self.request.user,
+            deleted_at__isnull=False,
+        )
+
+    def post(self, request, *args, **kwargs):
+        task = self.get_object()
+        task.deleted_at = None
+        task.updated_date = timezone.now()
+        task.save(update_fields=["deleted_at", "updated_date"])
+
+        return Response(self.get_serializer(task).data)
 
 
 class TaskStatisticsAPIView(GenericAPIView):

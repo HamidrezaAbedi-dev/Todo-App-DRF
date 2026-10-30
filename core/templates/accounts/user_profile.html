@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}پروفایل | Todo App{% endblock %}
+{% block page_name %}profile{% endblock %}
+{% block content %}
+<div class="app-shell">
+    <aside class="sidebar">
+        <a class="brand" href="{% url 'todos:todo' %}"><span class="brand-mark">T</span><span dir="ltr">Todo App</span></a>
+        <nav class="side-nav" aria-label="منوی اصلی">
+            <a href="{% url 'todos:todo' %}"><span class="nav-icon">▦</span> کارهای من</a>
+            <a class="active" href="{% url 'accounts:user-profile' %}"><span class="nav-icon">◉</span> پروفایل</a>
+            <a href="{% url 'accounts:change-password' %}"><span class="nav-icon">⌑</span> امنیت حساب</a>
+        </nav>
+        <div class="sidebar-bottom"><span class="sidebar-dot"></span> فضای کار شخصی</div>
+    </aside>
+    <main class="workspace">
+        <header class="topbar"><div><span class="eyebrow">حساب کاربری</span><h1>پروفایل من</h1></div><a class="button button-quiet" href="{% url 'todos:todo' %}">بازگشت به کارها</a></header>
+        <section class="settings-card">
+            <div class="section-heading"><span class="heading-icon">◉</span><div><h2>اطلاعات شخصی</h2><p class="muted">اطلاعات نمایشی حساب خودت را به‌روز نگه دار.</p></div></div>
+            <div class="profile-summary"><img id="profile-avatar" class="profile-avatar" alt="تصویر پروفایل"><div><strong id="profile-name">در حال بارگذاری...</strong><span id="profile-email" class="muted"></span></div></div>
+            <form id="profile-form" class="form-stack settings-form">
+                <label for="first-name">نام</label>
+                <input id="first-name" name="first_name" type="text" maxlength="255" autocomplete="given-name">
+                <label for="last-name">نام خانوادگی</label>
+                <input id="last-name" name="last_name" type="text" maxlength="255" autocomplete="family-name">
+                <label for="profile-image">تصویر پروفایل</label>
+                <input id="profile-image" name="image" type="file" accept="image/*">
+                <div class="form-actions"><button class="button button-primary" type="submit">ذخیره تغییرات</button></div>
+            </form>
+        </section>
+    </main>
+</div>
+{% endblock %}

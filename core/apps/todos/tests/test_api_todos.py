@@ -13,6 +13,7 @@ TASKS_URL = "/todos/api/v1/tasks-list/"
 STATS_URL = "/todos/api/v1/task/stats/"
 BULK_COMPLETE_URL = "/todos/api/v1/task/bulk-complete/"
 BULK_DELETE_URL = "/todos/api/v1/task/bulk-delete/"
+TASK_HISTORY_URL = "/todos/api/v1/task/history/"
 TASK_DETAIL_URL = "/todos/api/v1/task/{}/"
 
 
@@ -278,6 +279,65 @@ def test_bulk_delete_soft_deletes_all_requested_owned_tasks(
     assert response.data["deleted_count"] == 2
     assert Task.objects.filter(pk__in=task_ids, deleted_at__isnull=False).count() == 2
     assert authenticated_client.get(TASKS_URL).data["total"] == 0
+
+
+@pytest.mark.django_db
+def test_deleted_task_history_only_lists_the_authenticated_users_deleted_tasks(
+    authenticated_client, user, other_user
+):
+    deleted_task = Task.objects.create(
+        user=user,
+        title="Deleted task",
+        deleted_at=timezone.now(),
+    )
+    Task.objects.create(user=user, title="Active task")
+    Task.objects.create(
+        user=other_user,
+        title="Another user's deleted task",
+        deleted_at=timezone.now(),
+    )
+
+    response = authenticated_client.get(TASK_HISTORY_URL)
+
+    assert response.status_code == 200
+    assert response.data["total"] == 1
+    assert response.data["results"][0]["id"] == deleted_task.pk
+    assert response.data["results"][0]["deleted_at"] is not None
+
+
+@pytest.mark.django_db
+def test_deleted_task_history_requires_authentication(client):
+    response = client.get(TASK_HISTORY_URL)
+
+    assert response.status_code == 401
+
+
+@pytest.mark.django_db
+def test_deleted_task_can_be_restored_by_its_owner(
+    authenticated_client, user, other_user
+):
+    deleted_task = Task.objects.create(
+        user=user,
+        title="Restore me",
+        deleted_at=timezone.now(),
+    )
+    foreign_task = Task.objects.create(
+        user=other_user,
+        title="Not yours",
+        deleted_at=timezone.now(),
+    )
+
+    response = authenticated_client.post(
+        TASK_DETAIL_URL.format(deleted_task.pk) + "restore/"
+    )
+
+    assert response.status_code == 200
+    assert response.data["id"] == deleted_task.pk
+    deleted_task.refresh_from_db()
+    assert deleted_task.deleted_at is None
+    assert authenticated_client.post(
+        TASK_DETAIL_URL.format(foreign_task.pk) + "restore/"
+    ).status_code == 404
 
 
 @pytest.mark.django_db

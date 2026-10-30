@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}کارهای من | Todo App{% endblock %}
+{% block page_name %}todos{% endblock %}
+{% block content %}
+<div class="app-shell">
+    <aside class="sidebar">
+        <a class="brand" href="{% url 'todos:todo' %}"><span class="brand-mark">T</span><span dir="ltr">Todo App</span></a>
+        <nav class="side-nav" aria-label="منوی اصلی">
+            <a class="active" href="{% url 'todos:todo' %}"><span class="nav-icon">▦</span> کارهای من</a>
+            <a href="{% url 'accounts:user-profile' %}"><span class="nav-icon">◉</span> پروفایل</a>
+            <a href="{% url 'accounts:change-password' %}"><span class="nav-icon">⌑</span> امنیت حساب</a>
+        </nav>
+        <div class="sidebar-bottom"><span class="sidebar-dot"></span> فضای کار شخصی</div>
+    </aside>
+    <main class="workspace">
+        <header class="topbar">
+            <div><span class="eyebrow">داشبورد</span><h1>کارها و برنامه‌ها</h1></div>
+            <div class="topbar-actions"><a class="user-chip" href="{% url 'accounts:user-profile' %}"><span class="user-avatar">ر</span><span id="user-email">حساب کاربری</span></a><button class="button button-quiet" id="logout-button" type="button">خروج</button></div>
+        </header>
+        <section class="welcome-row">
+            <div><h2>امروز، روزِ انجام دادن است <span aria-hidden="true">✦</span></h2><p class="muted">کارهای کوچک، پیشرفت‌های بزرگ می‌سازند.</p></div>
+            <button class="button button-primary" id="new-task-button" type="button"><span class="plus">＋</span> کار جدید</button>
+        </section>
+        <section class="stats-grid" aria-label="آمار کارها">
+            <article class="stat-card"><span class="stat-icon stat-violet">▦</span><span class="stat-label">همه کارها</span><strong id="stat-total">—</strong><span class="stat-foot">در فهرست تو</span></article>
+            <article class="stat-card"><span class="stat-icon stat-green">✓</span><span class="stat-label">انجام‌شده</span><strong id="stat-completed">—</strong><span class="stat-foot">یک قدم رو به جلو</span></article>
+            <article class="stat-card"><span class="stat-icon stat-amber">◷</span><span class="stat-label">در انتظار</span><strong id="stat-pending">—</strong><span class="stat-foot">آماده شروع</span></article>
+            <article class="stat-card"><span class="stat-icon stat-red">!</span><span class="stat-label">عقب‌افتاده</span><strong id="stat-overdue">—</strong><span class="stat-foot">نیازمند توجه</span></article>
+        </section>
+        <section class="task-panel" id="active-task-panel">
+            <div class="panel-heading"><div><h2>فهرست کارها</h2><p class="muted">کارهایت را مرتب کن و با تمرکز جلو برو.</p></div><div class="panel-actions"><button class="button button-quiet" id="show-history-button" type="button">تاریخچهٔ حذف‌شده‌ها</button><button class="button button-outline" id="bulk-complete-button" type="button" disabled>تکمیل انتخاب‌شده‌ها</button><button class="button button-danger" id="bulk-delete-button" type="button" disabled>حذف انتخاب‌شده‌ها</button></div></div>
+            <div class="filters">
+                <label class="search-box"><span aria-hidden="true">⌕</span><input id="task-search" type="search" placeholder="جست‌وجو در کارها..." aria-label="جست‌وجو در کارها"></label>
+                <select id="status-filter" aria-label="فیلتر وضعیت"><option value="">همه وضعیت‌ها</option><option value="false">در انتظار</option><option value="true">انجام‌شده</option></select>
+                <select id="priority-filter" aria-label="فیلتر اولویت"><option value="">همه اولویت‌ها</option><option value="high">زیاد</option><option value="medium">متوسط</option><option value="low">کم</option></select>
+                <select id="sort-filter" aria-label="مرتب‌سازی"><option value="-created_date">جدیدترین</option><option value="created_date">قدیمی‌ترین</option><option value="due_date">موعد انجام</option><option value="priority">اولویت</option><option value="title">عنوان</option></select>
+            </div>
+            <div id="task-list" class="task-list" aria-live="polite"><div class="loading-state">در حال بارگذاری کارها...</div></div>
+            <div class="pagination"><span id="page-label" class="muted"></span><div><button class="button button-quiet" id="previous-page" type="button" disabled>قبلی</button><button class="button button-quiet" id="next-page" type="button" disabled>بعدی</button></div></div>
+        </section>
+        <section class="task-panel history-panel" id="history-panel" hidden>
+            <div class="panel-heading"><div><h2>تاریخچهٔ کارهای حذف‌شده</h2><p class="muted">حذف‌ها نرم هستند؛ هر زمان بخواهی می‌توانی کار را برگردانی.</p></div><button class="button button-quiet" id="hide-history-button" type="button">بازگشت به کارها</button></div>
+            <div id="history-list" class="task-list" aria-live="polite"><div class="loading-state">در حال بارگذاری تاریخچه...</div></div>
+            <div class="pagination"><span id="history-page-label" class="muted"></span><div><button class="button button-quiet" id="history-previous-page" type="button" disabled>قبلی</button><button class="button button-quiet" id="history-next-page" type="button" disabled>بعدی</button></div></div>
+        </section>
+        <footer class="workspace-footer">با آرامش برنامه‌ریزی کن، با اطمینان انجام بده.</footer>
+    </main>
+</div>
+<div class="modal-backdrop" id="task-modal" aria-hidden="true">
+    <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="task-modal-title">
+        <button class="modal-close" id="close-task-modal" type="button" aria-label="بستن">×</button>
+        <span class="eyebrow">مدیریت کار</span><h2 id="task-modal-title">کار جدید</h2>
+        <form id="task-form" class="form-stack">
+            <input id="task-id" type="hidden">
+            <label for="task-title">عنوان کار</label><input id="task-title" maxlength="100" required placeholder="مثلاً مطالعه فصل دوم">
+            <label for="task-description">توضیحات <span class="muted">(اختیاری)</span></label><textarea id="task-description" maxlength="1000" rows="3" placeholder="جزئیات بیشتری بنویس..."></textarea>
+            <div class="form-row">
+                <div><label for="task-priority">اولویت</label><select id="task-priority"><option value="low">کم</option><option value="medium" selected>متوسط</option><option value="high">زیاد</option></select></div>
+                <div><label for="task-due-date">موعد انجام <span class="muted">(اختیاری)</span></label><input id="task-due-date" type="datetime-local"></div>
+            </div>
+            <div class="form-actions"><button class="button button-quiet" id="cancel-task" type="button">انصراف</button><button class="button button-primary" type="submit">ذخیره کار</button></div>
+        </form>
+    </section>
+</div>
+{% endblock %}
