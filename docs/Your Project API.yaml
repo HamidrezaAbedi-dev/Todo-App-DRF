@@ -491,6 +491,37 @@ paths:
       responses:
         '204':
           description: No response body
+  /todos/api/v1/task/{id}/restore/:
+    post:
+      operationId: todos_api_v1_task_restore_create
+      description: Restore a soft-deleted task owned by the authenticated user.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - todos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskDetailRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TaskDetailRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TaskDetailRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskDetail'
+          description: ''
   /todos/api/v1/task/bulk-complete/:
     patch:
       operationId: todos_api_v1_task_bulk_complete_partial_update
@@ -524,6 +555,32 @@ paths:
       responses:
         '204':
           description: No response body
+  /todos/api/v1/task/history/:
+    get:
+      operationId: todos_api_v1_task_history_list
+      description: List the authenticated user's soft-deleted tasks.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - todos
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDeletedTaskList'
+          description: ''
   /todos/api/v1/task/stats/:
     get:
       operationId: todos_api_v1_task_stats_retrieve
@@ -609,6 +666,90 @@ components:
           maxItems: 100
       required:
       - ids
+    DeletedTask:
+      type: object
+      description: Serializer for the authenticated user's deleted task history.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          readOnly: true
+          nullable: true
+        is_completed:
+          type: boolean
+          readOnly: true
+        priority:
+          enum:
+          - low
+          - medium
+          - high
+          type: string
+          description: |-
+            * `low` - Low
+            * `medium` - Medium
+            * `high` - High
+          x-spec-enum-id: 3cd2babd9a875ec3
+          readOnly: true
+        due_date:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        created_date:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_date:
+          type: string
+          format: date-time
+          readOnly: true
+        deleted_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - created_date
+      - deleted_at
+      - description
+      - due_date
+      - id
+      - is_completed
+      - priority
+      - title
+      - updated_date
+      - user
+    PaginatedDeletedTaskList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeletedTask'
     PaginatedTasksListCreateList:
       type: object
       required:
