@@ -1,0 +1,3 @@
+docker-compose exec backend python manage.py graph_models -a -g -o database_schema.png
+
+docker-compose exec backend python manage.py graph_models -a -o database_schema.pdf

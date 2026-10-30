@@ -27,7 +27,11 @@ SECRET_KEY = config("SECRET_KEY", default="test")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", cast=bool, default=False)
 
-ALLOWED_HOSTS = config("SECRET_KEY", cast=lambda v:[item.strip() for item in v.split(",")], default="*")
+ALLOWED_HOSTS = config(
+    "ALLOWED_HOSTS",
+    cast=lambda value: [item.strip() for item in value.split(",")],
+    default="*",
+)
 
 
 # Application definition
@@ -276,7 +280,8 @@ SIMPLE_JWT = {
     "AUTH_COOKIE_HTTP_ONLY": True,
     "AUTH_COOKIE_PATH": "/",
     "AUTH_COOKIE_SAMESITE": config("AUTH_COOKIE_SAMESITE", default="Lax"),
-    "AUTH_CSRF_AUTHENTICATION": config("AUTH_CSRF_AUTHENTICATION", cast=bool, default=False)
+    "AUTH_CSRF_AUTHENTICATION": config("AUTH_CSRF_AUTHENTICATION", cast=bool, default=False),
+    "CHECK_REVOKE_TOKEN": True,
 }
 
 # accounts settings
@@ -284,7 +289,7 @@ AUTH_USER_MODEL = "accounts.User"
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "apps.accounts.api.utils.jwt_authentication.CookieJWTAuthentication",
     ],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }

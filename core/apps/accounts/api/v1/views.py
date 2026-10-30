@@ -1,12 +1,15 @@
 from rest_framework.generics import (
     CreateAPIView, GenericAPIView, RetrieveUpdateAPIView,
 )
+from django.middleware.csrf import get_token
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import (
-    TokenObtainPairView,TokenRefreshView,TokenVerifyView,TokenBlacklistView,
+    TokenObtainPairView, TokenRefreshView, TokenVerifyView, TokenBlacklistView,
 )
 from rest_framework_simplejwt.exceptions import TokenError
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
@@ -15,10 +18,18 @@ from django.db import transaction
 from django.conf import settings
 from .serializers import RegisterSerializer, ChangePasswordSerializer, ProfileSerializer
 from apps.accounts.messages import Messages
-from apps.accounts.api.utils.jwt_sessions import blacklist_refresh_token, blacklist_all_user_refresh_tokens
-from apps.accounts.api.utils.jwt_cookies import (
-    set_jwt_cookie, delete_jwt_cookie, is_web_client, get_access_cookie_name, get_refresh_cookie_name
+from apps.accounts.api.utils.jwt_sessions import (
+    blacklist_refresh_token,
+    blacklist_all_user_refresh_tokens,
 )
+from apps.accounts.api.utils.jwt_cookies import (
+    set_jwt_cookie,
+    delete_jwt_cookie,
+    is_web_client,
+    get_access_cookie_name,
+    get_refresh_cookie_name,
+)
+from apps.accounts.api.utils.jwt_authentication import enforce_csrf
 from apps.accounts.models import Profile
 from django.contrib.auth import get_user_model
 
@@ -30,6 +41,18 @@ class RegisterCreateAPIView(CreateAPIView):
     queryset = User.objects.all()
 
 
+@method_decorator(ensure_csrf_cookie, name="dispatch")
+class CSRFTokenAPIView(APIView):
+
+    authentication_classes = []
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        return Response({
+            "csrfToken": get_token(request)
+        })
+
+
 class CustomTokenObtainPairView(TokenObtainPairView):
     """
     Login:
@@ -37,7 +60,12 @@ class CustomTokenObtainPairView(TokenObtainPairView):
     - App: return tokens in the default Simple JWT JSON response.
     """
 
-    def post(self, request: Request, *args, **kwargs,) -> Response:
+    def post(self, request: Request, *args, **kwargs) -> Response:
+
+        # Enforce CSRF protection for browser clients.
+        if is_web_client(request):
+            enforce_csrf(request)
+
         response = super().post(request, *args, **kwargs)
 
         if response.status_code != status.HTTP_200_OK:
@@ -81,8 +109,13 @@ class CustomTokenRefreshView(TokenRefreshView):
     - App: accept refresh in JSON and return the default JSON response.
     """
 
-    def post(self, request: Request, *args, **kwargs,) -> Response:
+    def post(self, request: Request, *args, **kwargs) -> Response:
         web_client = is_web_client(request)
+
+        # Enforce CSRF protection for browser clients.
+        if web_client:
+            enforce_csrf(request)
+
         data = request.data.copy()
 
         if web_client:
@@ -100,6 +133,7 @@ class CustomTokenRefreshView(TokenRefreshView):
             data["refresh"] = refresh_token
 
         serializer = self.get_serializer(data=data)
+
         try:
             serializer.is_valid(raise_exception=True)
         except TokenError:
@@ -184,7 +218,10 @@ class CustomTokenVerifyView(TokenVerifyView):
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 
-        return Response({"detail": "Token is valid."}, status=status.HTTP_200_OK)
+        return Response(
+            {"detail": "Token is valid."},
+            status=status.HTTP_200_OK,
+        )
 
 
 class CustomTokenBlacklistView(TokenBlacklistView):
@@ -194,8 +231,12 @@ class CustomTokenBlacklistView(TokenBlacklistView):
     - App: blacklist the refresh token supplied in JSON.
     """
 
-    def post(self, request: Request, *args, **kwargs,) -> Response:
+    def post(self, request: Request, *args, **kwargs) -> Response:
         web_client = is_web_client(request)
+
+        # Enforce CSRF protection for browser clients.
+        if web_client:
+            enforce_csrf(request)
 
         if web_client:
             refresh_token = request.COOKIES.get(
@@ -265,38 +306,25 @@ class ChangePasswordGenericAPIView(GenericAPIView):
     """
     Change the authenticated user's password.
 
-    - Web: read the refresh token from the cookie, revoke it,
-        and clear authentication cookies.
-    - App: optionally revoke the refresh token supplied in JSON.
+    - Revoke all outstanding refresh tokens associated with the user.
+    - Invalidate existing access tokens when CHECK_REVOKE_TOKEN is enabled.
+    - Clear authentication cookies for web clients.
     """
 
     serializer_class = ChangePasswordSerializer
     permission_classes = (IsAuthenticated,)
 
-    def patch(self, request: Request, *args, **kwargs,) -> Response:
+    def patch(self, request: Request, *args, **kwargs) -> Response:
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
+        user = request.user
         web_client = is_web_client(request)
 
-        if web_client:
-            refresh_token = request.COOKIES.get(
-                get_refresh_cookie_name()
-            )
-        else:
-            refresh_token = request.data.get("refresh")
-
-        # Change the password of the authenticated user only.
-        serializer.save()
-
-        # Revoke the previous refresh token if provided.
-        if refresh_token:
-            revoked = blacklist_refresh_token(refresh_token)
-
-            if not revoked:
-                # Password has already changed.
-                # Log this event if your project has a logger configured.
-                pass
+        # Change the password and revoke all refresh tokens atomically.
+        with transaction.atomic():
+            serializer.save()
+            blacklist_all_user_refresh_tokens(user)
 
         response = Response(
             {
@@ -315,6 +343,7 @@ class CurrentUserProfileView(RetrieveUpdateAPIView):
     """
     Retrieve or update the authenticated user's profile.
     """
+
     serializer_class = ProfileSerializer
     queryset = Profile.objects.all()
     permission_classes = (IsAuthenticated,)
@@ -323,7 +352,6 @@ class CurrentUserProfileView(RetrieveUpdateAPIView):
         queryset = self.get_queryset()
         obj = get_object_or_404(queryset, user=self.request.user)
         return obj
-
 
 
 class DeleteUserDestroyAPIView(APIView):
