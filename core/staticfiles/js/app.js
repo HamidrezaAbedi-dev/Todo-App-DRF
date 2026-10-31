@@ -10,6 +10,7 @@
     let historyPage = 1;
     let historyPages = 1;
     let searchTimer;
+    let modalTask = null;
 
     function showToast(message, success) {
         const toast = $("#toast");
@@ -163,6 +164,18 @@
                     showToast("پروفایل با موفقیت به‌روز شد.", true);
                 }).fail(handleApiError).always(function () { setFormBusy(form, false); });
         });
+
+        $("#delete-account-button").on("click", function () {
+            if (!window.confirm("حساب کاربری و اطلاعات وابسته برای همیشه حذف می‌شوند. آیا مطمئنی؟")) return;
+
+            const button = $(this).prop("disabled", true);
+            apiRequest("DELETE", accountApi + "users/me/delete-account/").done(function () {
+                window.location.href = "/accounts/login/";
+            }).fail(function (xhr) {
+                handleApiError(xhr);
+                button.prop("disabled", false);
+            });
+        });
     }
 
     function bindTodos() {
@@ -182,8 +195,13 @@
 
         $("#new-task-button").on("click", function () { openTaskModal(); });
         $("#close-task-modal, #cancel-task").on("click", closeTaskModal);
+        $("#edit-task-button").on("click", function () { openTaskModal(modalTask); });
+        $("#complete-task-button").on("click", toggleTaskCompletion);
         $("#task-modal").on("click", function (event) {
             if (event.target === this) closeTaskModal();
+        });
+        $(document).on("keydown", function (event) {
+            if (event.key === "Escape" && $("#task-modal").hasClass("open")) closeTaskModal();
         });
         $("#task-form").on("submit", saveTask);
         $("#task-search").on("input", function () {
@@ -251,7 +269,12 @@
         tasks.forEach(function (task) {
             const row = $("<article>", { class: "task-row", "data-id": task.id });
             const checkbox = $("<input>", { class: "task-check", type: "checkbox", "aria-label": "انتخاب کار" });
-            const copy = $("<div>", { class: "task-copy" });
+            const copy = $("<div>", {
+                class: "task-copy",
+                role: "button",
+                tabindex: 0,
+                "aria-label": "نمایش جزئیات کار: " + task.title
+            });
             const title = $("<div>", { class: "task-title", text: task.title });
             if (task.is_completed) title.addClass("completed");
             copy.append(title);
@@ -287,11 +310,14 @@
                 loadStats();
             }).fail(handleApiError);
         });
-        list.find(".task-title").on("click", function () {
+        list.find(".task-copy").on("click", function () {
             const task = $(this).closest(".task-row").data("task");
-            apiRequest("PATCH", todoApi + "task/" + task.id + "/", { is_completed: !task.is_completed })
-                .done(function () { loadTasks(currentPage); loadStats(); }).fail(handleApiError);
-        }).css("cursor", "pointer");
+            showTaskDetails(task);
+        }).on("keydown", function (event) {
+            if (event.key !== "Enter" && event.key !== " ") return;
+            event.preventDefault();
+            showTaskDetails($(this).closest(".task-row").data("task"));
+        });
     }
 
     function updatePagination(total) {
@@ -303,8 +329,11 @@
     function openTaskModal(task) {
         const form = $("#task-form")[0];
         form.reset();
+        modalTask = task || null;
         $("#task-id").val(task ? task.id : "");
         $("#task-modal-title").text(task ? "ویرایش کار" : "کار جدید");
+        $("#task-details").prop("hidden", true);
+        $("#task-form").prop("hidden", false);
         if (task) {
             $("#task-title").val(task.title);
             $("#task-description").val(task.description || "");
@@ -315,8 +344,50 @@
         $("#task-title").trigger("focus");
     }
 
+    function showTaskDetails(task) {
+        renderTaskDetails(task);
+        $("#task-form").prop("hidden", true);
+        $("#task-details").prop("hidden", false);
+        $("#task-modal").addClass("open").attr("aria-hidden", "false");
+        $("#close-task-modal").trigger("focus");
+
+        apiRequest("GET", todoApi + "task/" + task.id + "/").done(function (details) {
+            if (modalTask && modalTask.id === details.id) renderTaskDetails(details);
+        }).fail(handleApiError);
+    }
+
+    function renderTaskDetails(task) {
+        modalTask = task;
+        $("#task-modal-title").text(task.title);
+        $("#task-detail-description").text(task.description || "توضیحی برای این کار ثبت نشده است.");
+        $("#task-detail-status").text(task.is_completed ? "انجام‌شده" : "در انتظار");
+        $("#task-detail-priority").text(priorityLabel(task.priority));
+        $("#task-detail-due-date").text(task.due_date ? formatDate(task.due_date) : "تعیین نشده");
+        $("#task-detail-created-date").text(task.created_date ? formatDate(task.created_date) : "—");
+        $("#task-detail-updated-date").text(task.updated_date ? formatDate(task.updated_date) : "—");
+        $("#complete-task-button")
+            .text(task.is_completed ? "بازگردانی به کارهای در انتظار" : "علامت‌گذاری به‌عنوان انجام‌شده")
+            .prop("disabled", false);
+    }
+
+    function toggleTaskCompletion() {
+        if (!modalTask) return;
+        const task = modalTask;
+        const button = $("#complete-task-button").prop("disabled", true);
+        apiRequest("PATCH", todoApi + "task/" + task.id + "/", {
+            is_completed: !task.is_completed
+        }).done(function () {
+            const completed = !task.is_completed;
+            if (modalTask && modalTask.id === task.id) closeTaskModal();
+            showToast(completed ? "کار تکمیل شد." : "کار به فهرست در انتظار بازگشت.", true);
+            loadTasks(currentPage);
+            loadStats();
+        }).fail(handleApiError).always(function () { button.prop("disabled", false); });
+    }
+
     function closeTaskModal() {
         $("#task-modal").removeClass("open").attr("aria-hidden", "true");
+        modalTask = null;
     }
 
     function saveTask(event) {
@@ -368,14 +439,14 @@
     }
 
     function showHistory() {
-        $("#active-task-panel").prop("hidden", true);
+        $("#active-dashboard").prop("hidden", true);
         $("#history-panel").prop("hidden", false);
         loadDeletedTasks(1);
     }
 
     function hideHistory() {
         $("#history-panel").prop("hidden", true);
-        $("#active-task-panel").prop("hidden", false);
+        $("#active-dashboard").prop("hidden", false);
     }
 
     function loadDeletedTasks(page) {
